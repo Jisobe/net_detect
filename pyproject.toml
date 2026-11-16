@@ -10,7 +10,6 @@ dependencies = [
     "joblib",
     "sentence-transformers>=3.0",
     "chromadb>=0.5",
-    "anthropic>=2.0",
     "requests",
     "beautifulsoup4",
     "pypdf",
@@ -27,8 +26,10 @@ netdiag = "netdiag.cli:main"
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools.packages.find]
-where = ["src"]
+# Modules live directly under src/ and are installed as the `netdiag` package.
+[tool.setuptools]
+package-dir = {"netdiag" = "src"}
+packages = ["netdiag", "netdiag.kb", "netdiag.evaluation"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

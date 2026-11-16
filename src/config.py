@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-PROJECT_ROOT = Path(os.environ.get("NETDIAG_ROOT", Path(__file__).resolve().parents[2]))
+PROJECT_ROOT = Path(os.environ.get("NETDIAG_ROOT", Path(__file__).resolve().parents[1]))
 
 DATA_DIR = PROJECT_ROOT / "data"
 RAW_DIR = DATA_DIR / "raw"
@@ -38,4 +38,12 @@ SOFI_FILES = {
 
 SAMPLE_INTERVAL_S = 180       # SOFI polls every 3 minutes
 BASELINE_WINDOW = 10          # samples (30 min) used for the rolling "normal" baseline
-RANDOM_SEED = 746
+RANDOM_SEED = 42
+
+# --- Retrieval ---
+EMBEDDING_MODEL = os.environ.get("NETDIAG_EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+CHUNK_SIZE_WORDS = 180
+CHUNK_OVERLAP_WORDS = 40
+TOP_K = 5
+# Below this best-hit cosine similarity the agentic step reformulates the query.
+RETRIEVAL_CONFIDENCE_THRESHOLD = 0.45

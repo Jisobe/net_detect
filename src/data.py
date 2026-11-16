@@ -55,7 +55,9 @@ def download_sofi(force: bool = False) -> None:
         if path.exists() and not force:
             continue
         print(f"Downloading SOFI {device} ...")
-        with urllib.request.urlopen(meta["url"], timeout=60) as resp:
+        # Mendeley rejects urllib's default User-Agent with 403, so send an explicit one.
+        req = urllib.request.Request(meta["url"], headers={"User-Agent": "netdiag/0.1"})
+        with urllib.request.urlopen(req, timeout=60) as resp:
             payload = resp.read()
         digest = hashlib.sha256(payload).hexdigest()
         if digest != meta["sha256"]:

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 
 from . import config
@@ -69,11 +68,11 @@ def cmd_diagnose(args):
     from .pipeline import DiagnosisAssistant
 
     row = _select_row(args)
-    assistant = DiagnosisAssistant(args.backend, agentic=not args.no_agentic)
+    assistant = DiagnosisAssistant(agentic=not args.no_agentic)
     report = assistant.diagnose(row, always_explain=args.always_explain)
     print(report.to_markdown())
     if not report.is_fault and not args.always_explain:
-        print("\nNo fault detected. Use --always-explain to retrieve guidance anyway.")
+        print("\nNo fault detected. Use --always-explain to retrieve passages anyway.")
     print("\nTimings: " + ", ".join(f"{k}={v:.2f}s" for k, v in report.timings.items()))
 
 
@@ -110,31 +109,21 @@ def main(argv=None):
 
     sub.add_parser("build-kb", help="chunk, embed and index the knowledge base").set_defaults(func=cmd_build_kb)
 
-    p = sub.add_parser("diagnose", help="diagnose one sample")
+    p = sub.add_parser("diagnose", help="detect, profile and retrieve passages for one sample")
     p.add_argument("--example", choices=["fault", "normal"], help="random test-split sample")
     p.add_argument("--device", choices=list(config.SOFI_FILES))
     p.add_argument("--timestamp", type=int, help="unix timestamp of the SOFI sample")
     p.add_argument("--csv", help="your own CSV with SOFI columns; diagnoses the last row")
     p.add_argument("--seed", type=int, default=0)
-    p.add_argument("--backend", default="auto", choices=["auto", "anthropic", "ollama", "extractive"])
-    p.add_argument("--always-explain", action="store_true", help="run RAG even if no fault is detected")
+    p.add_argument("--always-explain", action="store_true", help="run retrieval even if no fault is detected")
     p.add_argument("--no-agentic", action="store_true", help="disable query reformulation")
-    p.add_argument("--groundedness", action="store_true", help="score groundedness of the output")
     p.set_defaults(func=cmd_diagnose)
 
     p = sub.add_parser("eval-retrieval", help="Precision@k / Recall@k of the retriever")
     p.add_argument("--k", type=int, default=10)
     p.set_defaults(func=cmd_eval_retrieval)
 
-    p = sub.add_parser("eval-rag", help="classifier-only vs classifier+RAG comparison with groundedness")
-    p.add_argument("--n", type=int, default=20)
-    p.add_argument("--backend", default="auto", choices=["auto", "anthropic", "ollama", "extractive"])
-    p.set_defaults(func=cmd_eval_rag)
-
-    p = sub.add_parser("all", help="run the full pipeline end to end")
-    p.add_argument("--n", type=int, default=20)
-    p.add_argument("--backend", default="auto", choices=["auto", "anthropic", "ollama", "extractive"])
-    p.set_defaults(func=cmd_all)
+    sub.add_parser("all", help="download data, train, build the KB and evaluate retrieval").set_defaults(func=cmd_all)
 
     args = parser.parse_args(argv)
     args.func(args)

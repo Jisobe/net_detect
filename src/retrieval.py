@@ -5,7 +5,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from functools import lru_cache
-from typing import Callable
 
 import numpy as np
 
@@ -99,12 +98,10 @@ class RetrievalResult:
 
 class Retriever:
     def __init__(self, store: VectorStore | None = None, k: int = config.TOP_K,
-                 threshold: float = config.RETRIEVAL_CONFIDENCE_THRESHOLD,
-                 rewriter: Callable[[str, str], str] | None = None):
+                 threshold: float = config.RETRIEVAL_CONFIDENCE_THRESHOLD):
         self.store = store or VectorStore()
         self.k = k
         self.threshold = threshold
-        self.rewriter = rewriter  # optional LLM query rewriter: (query, category) -> query
 
     def retrieve(self, category: str, evidence: list[str], symptom_summary: str | None = None,
                  alt_categories: list[str] | None = None, agentic: bool = True) -> RetrievalResult:
@@ -115,14 +112,8 @@ class Retriever:
         if not agentic or result.confidence >= self.threshold:
             return result
 
-        # Low confidence: reformulate and retrieve again, then merge by best score.
-        candidates = []
-        if self.rewriter is not None:
-            try:
-                candidates.append(self.rewriter(query, category))
-            except Exception as exc:  # fall back to deterministic expansions
-                result.trace.append(f"LLM rewrite failed: {exc}")
-        candidates.append(f"{CATEGORIES[category].title}: {CATEGORIES[category].query_terms}")
+        # Low confidence: expand the query with category terms, retrieve again, merge by best score.
+        candidates = [f"{CATEGORIES[category].title}: {CATEGORIES[category].query_terms}"]
         for alt in alt_categories or []:
             if alt != category:
                 candidates.append(f"{CATEGORIES[alt].title}: {CATEGORIES[alt].query_terms}")

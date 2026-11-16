@@ -10,3 +10,4 @@ data/kb/chunks.jsonl
 data/kb/local/*
 !data/kb/local/README.md
 artifacts/*.joblib
+*.egg-info/

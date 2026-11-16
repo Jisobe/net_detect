@@ -30,7 +30,7 @@ netdiag train                        # compares GBDT / RF / MLP, saves the best 
 netdiag fetch-kb && netdiag build-kb # download docs, chunk, embed, index
 netdiag diagnose --example fault --groundedness
 netdiag diagnose --device CoreSwitch-II --timestamp 1568676060
-netdiag diagnose --csv my_poll.csv   # your own data with SOFI columns (last row is diagnosed)
+netdiag diagnose --csv my_poll.csv
 netdiag eval-retrieval
 netdiag eval-rag --n 20 --backend anthropic
 pytest

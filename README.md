@@ -96,7 +96,8 @@ Relevance labels are generated from per-category keyword patterns and written to
 | | agentic reformulation | **0.71** | **0.58** | **0.86** | **0.79** |
 | 15 queries from detected SOFI test faults | either | 1.00 | 0.80 | 1.00 | 1.00 |
 
-- **Reformulation helps on hand-written queries** (P@1 +0.10, MRR +0.08). Queries built from SOFI detections already clear the confidence threshold, so reformulation never triggers and both modes are identical.
+- **Reformulation helps on hand-written queries** (P@1 +0.10, MRR +0.08). Queries built from SOFI detections already clear the confidence threshold (best cosine ≥ 0.53 vs. 0.45), so reformulation never triggers and both modes are identical.
+- **The SOFI result covers one category.** The detector catches 18 of 76 test faults; the evaluation keeps up to 15 per category, and all 15 are profiled as `traffic_loss`. Perfect P@1 there says nothing about the other categories.
 - **Weakest categories:** `device_restart` (MRR 0.27) and `high_latency` (MRR 0.50). The corpus has little operational guidance on reloads or latency; vendor guides in `data/kb/local/` are the obvious fix.
 
 ## Limitations and next steps
